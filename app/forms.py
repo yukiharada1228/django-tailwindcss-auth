@@ -76,9 +76,9 @@ class SignUpForm(UserCreationForm):
         return user
 
     def _send_activation_email(self, user):
-        subject = "[Django TailwindCSS] 仮登録完了のお知らせ"
+        subject = "[Django TailwindCSS Auth] 仮登録完了のお知らせ"
         message_template = """
-Django TailwindCSS にご登録いただきありがとうございます。
+Django TailwindCSS Auth にご登録いただきありがとうございます。
 以下のURLをクリックして、本登録を完了してください。
 
 """
