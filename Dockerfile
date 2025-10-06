@@ -24,4 +24,4 @@ COPY . .
 # Tailwind のビルド成果物を取り込み
 COPY --from=frontend-builder /app/static/css/output.css ./static/css/output.css
 
-CMD ["sh", "-c", "uv run python manage.py collectstatic --noinput && uv run gunicorn config.asgi:application -k uvicorn_worker.UvicornWorker --bind 0.0.0.0:8000"] 
+CMD ["sh", "-c", "uv run python manage.py migrate --noinput && uv run python manage.py collectstatic --noinput && uv run gunicorn config.asgi:application -k uvicorn_worker.UvicornWorker --bind 0.0.0.0:8000"] 
