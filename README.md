@@ -46,13 +46,12 @@ FRONTEND_URL=http://localhost:8000
 docker compose up --build -d
 ```
 
-### 4. データベースの初期化
+初回起動時にマイグレーションと静的ファイル収集（collectstatic）が自動実行されます。
+
+### 4. 管理ユーザーの作成（任意）
 
 ```bash
-# マイグレーションを実行
-docker compose exec web uv run python manage.py migrate
-
-# スーパーユーザーを作成（オプション）
+# スーパーユーザーを作成
 docker compose exec web uv run python manage.py createsuperuser
 ```
 
@@ -111,7 +110,7 @@ django-tailwindcss-auth/
    - `docker compose logs web` で `collectstatic` の実行を確認してください
 
 2. **データベースエラー**
-   - `docker compose exec web uv run python manage.py migrate` を実行してください
+   - 起動時にマイグレーションが自動実行されます。失敗した場合は `docker compose logs web` を確認し、必要に応じて `docker compose exec web uv run python manage.py migrate` を実行してください
 
 ## 貢献
 
