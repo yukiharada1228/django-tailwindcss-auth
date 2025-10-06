@@ -1,0 +1,80 @@
+from django import forms
+from django.conf import settings
+from django.contrib.auth import get_user_model
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.encoding import force_bytes
+from django.utils.http import urlsafe_base64_encode
+
+User = get_user_model()
+
+
+class SignUpForm(UserCreationForm):
+    """サインアップフォーム"""
+    email = forms.EmailField(
+        label="メールアドレス",
+        required=True,
+        widget=forms.EmailInput(attrs={
+            "class": "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500",
+            "placeholder": "メールアドレスを入力"
+        })
+    )
+    username = forms.CharField(
+        label="ユーザー名",
+        widget=forms.TextInput(attrs={
+            "class": "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500",
+            "placeholder": "ユーザー名を入力"
+        })
+    )
+    password1 = forms.CharField(
+        label="パスワード",
+        widget=forms.PasswordInput(attrs={
+            "class": "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500",
+            "placeholder": "パスワードを入力"
+        })
+    )
+    password2 = forms.CharField(
+        label="パスワード（確認）",
+        widget=forms.PasswordInput(attrs={
+            "class": "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500",
+            "placeholder": "パスワードを再入力"
+        })
+    )
+
+    class Meta:
+        model = User
+        fields = ("username", "email", "password1", "password2")
+
+    def clean_email(self):
+        email = self.cleaned_data.get("email")
+        if User.objects.filter(email=email).exists():
+            raise forms.ValidationError("このメールアドレスは既に登録されています。")
+        return email
+
+    def clean_username(self):
+        username = self.cleaned_data.get("username")
+        if User.objects.filter(username=username).exists():
+            raise forms.ValidationError("このユーザー名は既に使用されています。")
+        return username
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.email = self.cleaned_data["email"]
+        user.is_active = False  # アクティベーションが必要
+        if commit:
+            user.save()
+            self._send_activation_email(user)
+        return user
+
+    def _send_activation_email(self, user):
+        subject = "[Django TailwindCSS] 仮登録完了のお知らせ"
+        message_template = """
+Django TailwindCSS にご登録いただきありがとうございます。
+以下のURLをクリックして、本登録を完了してください。
+
+"""
+        uid = urlsafe_base64_encode(force_bytes(user.pk))
+        token = default_token_generator.make_token(user)
+        activate_url = settings.FRONTEND_URL + f"/activate/{uid}/{token}/"
+        message = message_template + activate_url
+        user.email_user(subject, message)
