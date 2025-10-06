@@ -21,7 +21,7 @@ Django 5.2.7とTailwindCSSを使用した認証機能付きWebアプリケーシ
 ### 1. リポジトリのクローン
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/yukiharada1228/django-tailwindcss-auth.git
 cd django-tailwindcss-auth
 ```
 
