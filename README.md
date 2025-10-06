@@ -4,17 +4,15 @@ Django 5.2.7とTailwindCSSを使用した認証機能付きWebアプリケーシ
 
 ## 機能
 
-- ユーザー認証（登録、ログイン、アクティベーション）
+- ユーザー認証（登録・ログイン）
 - カスタムユーザーモデル（メールアドレス必須）
 - TailwindCSSによるモダンなUI
-- メール送信機能（Mailgun対応）
 - 日本語対応
 
 ## 必要な環境
 
-- Python 3.12以上
-- Node.js（TailwindCSS用）
-- uv（Pythonパッケージ管理）
+- Docker
+- Docker Compose v2 以降
 
 ## セットアップ
 
@@ -25,14 +23,7 @@ git clone https://github.com/yukiharada1228/django-tailwindcss-auth.git
 cd django-tailwindcss-auth
 ```
 
-### 2. Python環境のセットアップ
-
-```bash
-# uvを使用して依存関係をインストール
-uv sync
-```
-
-### 3. 環境変数の設定
+### 2. 環境変数の設定
 
 `.env`ファイルを作成し、以下の設定を行います：
 
@@ -45,50 +36,27 @@ ALLOWED_HOSTS=localhost,127.0.0.1
 # データベース設定
 DATABASE_URL=sqlite:///db.sqlite3
 
-# メール設定（オプション）
-USE_MAILGUN=False
-MAILGUN_API_KEY=your_mailgun_api_key_here
-MAILGUN_SENDER_DOMAIN=your_domain.mailgun.org
-
 # フロントエンドURL
 FRONTEND_URL=http://localhost:8000
+```
+
+### 3. コンテナのビルドと起動
+
+```bash
+docker compose up --build -d
 ```
 
 ### 4. データベースの初期化
 
 ```bash
 # マイグレーションを実行
-uv run python manage.py migrate
+docker compose exec web uv run python manage.py migrate
 
 # スーパーユーザーを作成（オプション）
-uv run python manage.py createsuperuser
+docker compose exec web uv run python manage.py createsuperuser
 ```
 
-### 5. TailwindCSSのセットアップ
-
-```bash
-# Node.jsの依存関係をインストール
-npm install
-
-# TailwindCSSをビルド（開発モード）
-npm run build
-```
-
-## 開発サーバーの起動
-
-### 1. Djangoサーバーの起動
-
-```bash
-uv run python manage.py runserver
-```
-
-### 2. TailwindCSSの監視（別ターミナル）
-
-```bash
-npm run build
-```
-
-これで `http://127.0.0.1:8000` でアプリケーションにアクセスできます。
+これで `http://127.0.0.1/`（または `http://localhost/`）でアプリケーションにアクセスできます。
 
 ## プロジェクト構造
 
@@ -123,20 +91,6 @@ django-tailwindcss-auth/
 - `/auth/activate/<token>/` - アカウントアクティベーション
 - `/admin/` - 管理画面
 
-## メール設定
-
-### 開発環境
-デフォルトでは、メールはコンソールに出力されます。
-
-### 本番環境（Mailgun使用）
-`.env`ファイルで以下の設定を行います：
-
-```bash
-USE_MAILGUN=True
-MAILGUN_API_KEY=your_actual_api_key
-MAILGUN_SENDER_DOMAIN=your_domain.mailgun.org
-```
-
 ## カスタマイズ
 
 ### TailwindCSSの設定
@@ -148,30 +102,16 @@ MAILGUN_SENDER_DOMAIN=your_domain.mailgun.org
 ### テンプレートのカスタマイズ
 `templates/`ディレクトリ内のHTMLファイルを編集してUIをカスタマイズできます。
 
-## デプロイ
-
-### 本番環境での設定
-
-1. `DEBUG=False`に設定
-2. `SECRET_KEY`を安全な値に変更
-3. `ALLOWED_HOSTS`に適切なドメインを設定
-4. データベースを本番用に設定
-5. 静的ファイルの収集: `uv run python manage.py collectstatic`
-
 ## トラブルシューティング
 
 ### よくある問題
 
-1. **TailwindCSSが適用されない**
-   - `npm run build`を実行してCSSをビルドしてください
-   - `static/css/output.css`が存在することを確認してください
+1. **CSSが適用されない**
+   - 変更を反映するには再ビルドが必要です: `docker compose build --no-cache && docker compose up -d`
+   - `docker compose logs web` で `collectstatic` の実行を確認してください
 
-2. **メールが送信されない**
-   - `.env`ファイルの設定を確認してください
-   - 開発環境ではコンソールに出力されます
-
-3. **データベースエラー**
-   - `uv run python manage.py migrate`を実行してください
+2. **データベースエラー**
+   - `docker compose exec web uv run python manage.py migrate` を実行してください
 
 ## 貢献
 
