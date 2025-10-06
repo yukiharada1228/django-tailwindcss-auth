@@ -12,6 +12,10 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 import os
 from pathlib import Path
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -21,12 +25,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-+o8t-lw=)6_mjdck!k6n+v#)5x%&%9bzp#wd74^(9-x^b($bb+"
+SECRET_KEY = os.environ.get("SECRET_KEY", "django-insecure-+o8t-lw=)6_mjdck!k6n+v#)5x%&%9bzp#wd74^(9-x^b($bb+")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get("DEBUG", "True").lower() == "true"
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "").split(",") if os.environ.get("ALLOWED_HOSTS") else []
 
 
 # Application definition
@@ -129,10 +133,23 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 AUTH_USER_MODEL = "app.User"
 
 # Email settings
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-DEFAULT_FROM_EMAIL = os.environ.get(
-    "DEFAULT_FROM_EMAIL", "Django TailwindCSS <noreply@localhost>"
-)
+USE_MAILGUN = os.environ.get("USE_MAILGUN", "FALSE") == "TRUE"
+
+if USE_MAILGUN:
+    EMAIL_BACKEND = "anymail.backends.mailgun.EmailBackend"
+    mailgun_sender_domain = os.environ.get("MAILGUN_SENDER_DOMAIN")
+    ANYMAIL = {
+        "MAILGUN_API_KEY": os.environ.get("MAILGUN_API_KEY"),
+        "MAILGUN_SENDER_DOMAIN": mailgun_sender_domain,
+    }
+    DEFAULT_FROM_EMAIL = os.environ.get(
+        "DEFAULT_FROM_EMAIL", f"Django TailwindCSS <noreply@{mailgun_sender_domain}>"
+    )
+else:
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+    DEFAULT_FROM_EMAIL = os.environ.get(
+        "DEFAULT_FROM_EMAIL", "Django TailwindCSS <noreply@localhost>"
+    )
 
 # Frontend URL for activation emails
 FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://127.0.0.1:8000")
