@@ -22,8 +22,19 @@ services:
       - .env
     networks:
       - django-tailwindcss-auth-network
+  postgres:
+    image: postgres:17
+    container_name: django-tailwindcss-auth-postgres
+    restart: always
+    env_file:
+      - .env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - django-tailwindcss-auth-network
 networks:
   django-tailwindcss-auth-network:
     driver: bridge
 volumes:
   staticfiles:
+  postgres_data:
