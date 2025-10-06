@@ -133,7 +133,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 AUTH_USER_MODEL = "app.User"
 
 # Email settings
-USE_MAILGUN = os.environ.get("USE_MAILGUN", "FALSE") == "TRUE"
+USE_MAILGUN = os.environ.get("USE_MAILGUN", "False") == "True"
 
 if USE_MAILGUN:
     EMAIL_BACKEND = "anymail.backends.mailgun.EmailBackend"
