@@ -11,34 +11,43 @@ User = get_user_model()
 
 class SignUpForm(UserCreationForm):
     """サインアップフォーム"""
+
     email = forms.EmailField(
         label="メールアドレス",
         required=True,
-        widget=forms.EmailInput(attrs={
-            "class": "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500",
-            "placeholder": "メールアドレスを入力"
-        })
+        widget=forms.EmailInput(
+            attrs={
+                "class": "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500",
+                "placeholder": "メールアドレスを入力",
+            }
+        ),
     )
     username = forms.CharField(
         label="ユーザー名",
-        widget=forms.TextInput(attrs={
-            "class": "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500",
-            "placeholder": "ユーザー名を入力"
-        })
+        widget=forms.TextInput(
+            attrs={
+                "class": "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500",
+                "placeholder": "ユーザー名を入力",
+            }
+        ),
     )
     password1 = forms.CharField(
         label="パスワード",
-        widget=forms.PasswordInput(attrs={
-            "class": "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500",
-            "placeholder": "パスワードを入力"
-        })
+        widget=forms.PasswordInput(
+            attrs={
+                "class": "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500",
+                "placeholder": "パスワードを入力",
+            }
+        ),
     )
     password2 = forms.CharField(
         label="パスワード（確認）",
-        widget=forms.PasswordInput(attrs={
-            "class": "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500",
-            "placeholder": "パスワードを再入力"
-        })
+        widget=forms.PasswordInput(
+            attrs={
+                "class": "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500",
+                "placeholder": "パスワードを再入力",
+            }
+        ),
     )
 
     class Meta:

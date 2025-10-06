@@ -1,13 +1,13 @@
+from django.contrib import messages
 from django.contrib.auth import login, logout
-from django.contrib.auth.views import LoginView as AuthLoginView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.tokens import default_token_generator
-from django.shortcuts import render, redirect
+from django.contrib.auth.views import LoginView as AuthLoginView
+from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_decode
 from django.views.generic import CreateView, TemplateView
-from django.contrib import messages
 
 from .forms import SignUpForm
 from .models import User
@@ -15,20 +15,23 @@ from .models import User
 
 class IndexView(LoginRequiredMixin, TemplateView):
     """ログイン必須のホームページ"""
+
     template_name = "index.html"
     login_url = "app:login"
-    
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context.update({
-            "title": "Django TailwindCSS",
-            "button_body": "Click me",
-        })
+        context.update(
+            {
+                "title": "Django TailwindCSS",
+            }
+        )
         return context
 
 
 class LoginView(AuthLoginView):
     """カスタムログインビュー"""
+
     template_name = "auth/login.html"
     redirect_authenticated_user = True
 
@@ -38,6 +41,7 @@ class LoginView(AuthLoginView):
 
 class SignUpView(CreateView):
     """サインアップビュー"""
+
     form_class = SignUpForm
     template_name = "auth/signup.html"
     success_url = reverse_lazy("app:signup_done")
@@ -50,13 +54,14 @@ class SignUpView(CreateView):
 
 class SignUpDoneView(TemplateView):
     """サインアップ完了ビュー"""
+
     template_name = "auth/signup_done.html"
 
 
 def logout_view(request):
     """カスタムログアウトビュー"""
     logout(request)
-    return redirect('app:login')
+    return redirect("app:login")
 
 
 def activate_user(uidb64, token):
@@ -76,6 +81,7 @@ def activate_user(uidb64, token):
 
 class ActivateView(TemplateView):
     """アクティベーションビュー"""
+
     template_name = "auth/activate.html"
 
     def get(self, request, uidb64, token, *args, **kwargs):
