@@ -6,4 +6,4 @@ WORKDIR ${APP_HOME}
 COPY pyproject.toml uv.lock ./
 RUN uv sync --frozen --no-dev
 
-CMD ["uv", "run", "gunicorn", "config.wsgi:application", "-k", "uvicorn_worker.UvicornWorker"] 
+CMD ["uv", "run", "gunicorn", "config.asgi:application", "-k", "uvicorn_worker.UvicornWorker"] 
