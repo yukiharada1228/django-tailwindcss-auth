@@ -6,6 +6,8 @@ Django 5.2.7とTailwindCSSを使用した認証機能付きWebアプリケーシ
 
 - ユーザー認証（登録・ログイン・アカウントアクティベーション）
 - カスタムユーザーモデル（メールアドレス必須）
+- メディアファイル管理（音声・動画ファイルのアップロード・管理）
+- ファイルの安全な保存と管理
 - TailwindCSSによるモダンなUI
 - 日本語対応
 - PostgreSQLデータベース
@@ -85,9 +87,9 @@ docker compose exec web uv run python manage.py createsuperuser
 ```
 django-tailwindcss-auth/
 ├── app/                    # メインアプリケーション
-│   ├── models.py          # カスタムユーザーモデル
+│   ├── models.py          # カスタムユーザーモデル・メディアファイルモデル
 │   ├── views.py           # ビュー
-│   ├── forms.py           # フォーム
+│   ├── forms.py           # フォーム（認証・メディアファイルアップロード）
 │   ├── urls.py            # URL設定
 │   ├── admin.py           # 管理画面設定
 │   └── migrations/        # データベースマイグレーション
@@ -102,6 +104,11 @@ django-tailwindcss-auth/
 │   │   ├── signup.html    # 登録ページ
 │   │   ├── signup_done.html # 登録完了ページ
 │   │   └── activate.html  # アクティベーションページ
+│   ├── multimedia/        # メディアファイル関連テンプレート
+│   │   ├── upload.html    # ファイルアップロードページ
+│   │   ├── list.html      # ファイル一覧ページ
+│   │   ├── detail.html    # ファイル詳細ページ
+│   │   └── delete.html    # ファイル削除ページ
 │   ├── base.html          # ベーステンプレート
 │   └── index.html         # トップページ
 ├── static/                # 静的ファイル
@@ -122,10 +129,19 @@ django-tailwindcss-auth/
 
 ## 利用可能なページ
 
+### 認証関連
 - `/` - トップページ
 - `/auth/signup/` - ユーザー登録
 - `/auth/login/` - ログイン
 - `/auth/activate/<token>/` - アカウントアクティベーション
+
+### メディアファイル管理
+- `/multimedia/upload/` - ファイルアップロード
+- `/multimedia/list/` - ファイル一覧
+- `/multimedia/detail/<id>/` - ファイル詳細
+- `/multimedia/delete/<id>/` - ファイル削除
+
+### 管理画面
 - `/admin/` - 管理画面
 
 ## 開発
@@ -182,6 +198,18 @@ docker compose exec web uv run python manage.py makemigrations
 docker compose exec web uv run python manage.py migrate
 ```
 
+### メディアファイルの管理
+アップロードされたメディアファイルは以下の機能を提供します：
+
+- **安全なファイル保存**: タイムスタンプベースのファイル名で重複を回避
+- **ファイルサイズ制限**: 100MB以下のファイルのみアップロード可能
+- **ファイル形式検証**: 音声・動画ファイルの形式を自動検証
+- **完全削除**: ファイルとデータベースレコードの両方を安全に削除
+
+#### サポートされるファイル形式
+- **音声ファイル**: MP3, WAV, AAC, OGG等
+- **動画ファイル**: MP4, AVI, MOV, WMV等
+
 ## トラブルシューティング
 
 ### よくある問題
@@ -203,6 +231,11 @@ docker compose exec web uv run python manage.py migrate
 
 5. **ポートが既に使用されている**
    - ポート80が既に使用されている場合は、`docker-compose.yml`でポート番号を変更してください
+
+6. **メディアファイルのアップロードエラー**
+   - ファイルサイズが100MBを超えている場合は、より小さなファイルを選択してください
+   - サポートされていないファイル形式の場合は、音声・動画ファイルを選択してください
+   - `docker compose logs web` でアップロードエラーの詳細を確認してください
 
 ### ログの確認
 
