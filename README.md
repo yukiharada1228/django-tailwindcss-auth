@@ -1,6 +1,6 @@
-# Django TailwindCSS Auth プロジェクト
+# Django TailwindCSS Multimedia Auth プロジェクト
 
-Django 5.2.7とTailwindCSSを使用した認証機能付きWebアプリケーションです。PostgreSQLデータベースとNginxリバースプロキシを使用した本格的な構成になっています。
+Django 5.2.7とTailwindCSSを使用した認証機能付きマルチメディア管理Webアプリケーションです。PostgreSQLデータベースとNginxリバースプロキシを使用した本格的な構成になっています。
 
 ## 機能
 
@@ -34,8 +34,8 @@ Django 5.2.7とTailwindCSSを使用した認証機能付きWebアプリケーシ
 ### 1. リポジトリのクローン
 
 ```bash
-git clone https://github.com/yukiharada1228/django-tailwindcss-auth.git
-cd django-tailwindcss-auth
+git clone https://github.com/yukiharada1228/django-tailwindcss-multimedia-auth.git
+cd django-tailwindcss-multimedia-auth
 ```
 
 ### 2. 環境変数の設定
@@ -62,7 +62,7 @@ FRONTEND_URL=http://localhost
 USE_MAILGUN=False
 MAILGUN_API_KEY=your-mailgun-api-key
 MAILGUN_SENDER_DOMAIN=your-domain.com
-DEFAULT_FROM_EMAIL=Django TailwindCSS <noreply@your-domain.com>
+DEFAULT_FROM_EMAIL=Django TailwindCSS Multimedia <noreply@your-domain.com>
 ```
 
 ### 3. コンテナのビルドと起動
@@ -85,7 +85,7 @@ docker compose exec web uv run python manage.py createsuperuser
 ## プロジェクト構造
 
 ```
-django-tailwindcss-auth/
+django-tailwindcss-multimedia-auth/
 ├── app/                    # メインアプリケーション
 │   ├── models.py          # カスタムユーザーモデル・メディアファイルモデル
 │   ├── views.py           # ビュー
