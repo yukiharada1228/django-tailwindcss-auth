@@ -112,7 +112,7 @@ wheels = [
 ]
 
 [[package]]
-name = "django-tailwindcss-auth"
+name = "django-tailwindcss-multimedia-auth"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
