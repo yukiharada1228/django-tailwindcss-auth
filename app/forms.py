@@ -6,6 +6,8 @@ from django.contrib.auth.tokens import default_token_generator
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 
+from .models import MediaFile
+
 User = get_user_model()
 
 
@@ -87,3 +89,65 @@ Django TailwindCSS Auth にご登録いただきありがとうございます�
         activate_url = settings.FRONTEND_URL + f"/activate/{uid}/{token}/"
         message = message_template + activate_url
         user.email_user(subject, message)
+
+
+class MediaFileUploadForm(forms.ModelForm):
+    """メディアファイルアップロードフォーム"""
+
+    class Meta:
+        model = MediaFile
+        fields = ["title", "description", "file_type", "file"]
+        widgets = {
+            "title": forms.TextInput(
+                attrs={
+                    "class": "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500",
+                    "placeholder": "ファイルのタイトルを入力",
+                }
+            ),
+            "description": forms.Textarea(
+                attrs={
+                    "class": "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500",
+                    "rows": 3,
+                    "placeholder": "ファイルの説明を入力（任意）",
+                }
+            ),
+            "file_type": forms.Select(
+                attrs={
+                    "class": "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                }
+            ),
+            "file": forms.FileInput(
+                attrs={
+                    "class": "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500",
+                    "accept": "audio/*,video/*",
+                }
+            ),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["title"].label = "タイトル"
+        self.fields["description"].label = "説明"
+        self.fields["file_type"].label = "ファイル種別"
+        self.fields["file"].label = "ファイル"
+
+    def clean_file(self):
+        file = self.cleaned_data.get("file")
+        if file:
+            # ファイルサイズ制限（100MB）
+            max_size = 100 * 1024 * 1024  # 100MB
+            if file.size > max_size:
+                raise forms.ValidationError(
+                    "ファイルサイズが大きすぎます。100MB以下のファイルを選択してください。"
+                )
+
+            # ファイル形式の検証
+            file_type = self.cleaned_data.get("file_type")
+            if file_type == "audio":
+                if not file.content_type.startswith("audio/"):
+                    raise forms.ValidationError("音声ファイルを選択してください。")
+            elif file_type == "video":
+                if not file.content_type.startswith("video/"):
+                    raise forms.ValidationError("動画ファイルを選択してください。")
+
+        return file
