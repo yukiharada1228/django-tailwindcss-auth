@@ -89,6 +89,12 @@ class MediaFile(models.Model):
         """ファイルサイズをMB単位で返す"""
         return round(self.file_size / (1024 * 1024), 2)
 
+    def get_safe_filename(self):
+        """安全なファイル名を取得"""
+        if self.file:
+            return os.path.basename(self.file.name)
+        return ""
+
     def delete(self, *args, **kwargs):
         """
         メディアファイルを完全に削除（ファイル、ディレクトリ、DB）

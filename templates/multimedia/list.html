@@ -69,7 +69,7 @@
                                                 {{ media_file.title }}
                                             </h3>
                                             <p class="text-sm text-gray-500">
-                                                {{ media_file.get_file_type_display }} • {{ media_file.get_file_size_mb }}MB • {{ media_file.created_at|date:"Y/m/d H:i" }}
+                                                {{ media_file.get_safe_filename }} • {{ media_file.get_file_type_display }} • {{ media_file.get_file_size_mb }}MB • {{ media_file.created_at|date:"Y/m/d H:i" }}
                                             </p>
                                             {% if media_file.description %}
                                                 <p class="text-sm text-gray-600 mt-1">
