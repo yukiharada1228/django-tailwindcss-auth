@@ -5,7 +5,7 @@ from django.utils.translation import gettext_lazy as _
 from .models import User
 
 # 管理画面のタイトル設定
-admin.site.site_header = "Django TailwindCSS 管理画面"
+admin.site.site_header = "Django TailwindCSS Multimedia Auth 管理画面"
 admin.site.site_title = "管理画面"
 admin.site.index_title = "サイト管理"
 

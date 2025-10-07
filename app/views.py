@@ -28,7 +28,7 @@ class IndexView(LoginRequiredMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         context.update(
             {
-                "title": "Django TailwindCSS Auth",
+                "title": "Django TailwindCSS Multimedia Auth",
             }
         )
         return context

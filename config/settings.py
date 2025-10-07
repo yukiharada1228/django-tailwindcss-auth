@@ -159,12 +159,12 @@ if USE_MAILGUN:
         "MAILGUN_SENDER_DOMAIN": mailgun_sender_domain,
     }
     DEFAULT_FROM_EMAIL = os.environ.get(
-        "DEFAULT_FROM_EMAIL", f"Django TailwindCSS <noreply@{mailgun_sender_domain}>"
+        "DEFAULT_FROM_EMAIL", f"Django TailwindCSS Multimedia Auth <noreply@{mailgun_sender_domain}>"
     )
 else:
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
     DEFAULT_FROM_EMAIL = os.environ.get(
-        "DEFAULT_FROM_EMAIL", "Django TailwindCSS <noreply@localhost>"
+        "DEFAULT_FROM_EMAIL", "Django TailwindCSS Multimedia Auth <noreply@localhost>"
     )
 
 # Frontend URL for activation emails
