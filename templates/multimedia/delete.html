@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+
+{% block title %}ファイル削除確認{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-3xl mx-auto">
+        <!-- ヘッダー -->
+        <div class="bg-white shadow rounded-lg mb-8">
+            <div class="px-4 py-5 sm:p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-900">
+                            ファイル削除確認
+                        </h1>
+                        <p class="mt-2 text-gray-600">
+                            この操作は取り消すことができません
+                        </p>
+                    </div>
+                    <div class="flex space-x-4">
+                        <a href="{% url 'app:media_detail' object.pk %}" 
+                           class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                            詳細に戻る
+                        </a>
+                        <a href="{% url 'app:media_list' %}" 
+                           class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                            一覧に戻る
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 削除確認フォーム -->
+        <div class="bg-white shadow rounded-lg">
+            <div class="px-4 py-5 sm:p-6">
+                <!-- 警告メッセージ -->
+                <div class="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <h3 class="text-sm font-medium text-red-800">
+                                注意: この操作は取り消せません
+                            </h3>
+                            <div class="mt-2 text-sm text-red-700">
+                                <p>このファイルを削除すると、以下の情報が完全に失われます：</p>
+                                <ul class="list-disc list-inside mt-2 space-y-1">
+                                    <li>ファイル本体</li>
+                                    <li>ファイル情報（タイトル、説明など）</li>
+                                    <li>アップロード履歴</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ファイル情報 -->
+                <div class="mb-6">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">削除対象ファイル</h3>
+                    <div class="border border-gray-200 rounded-lg p-4">
+                        <div class="flex items-center space-x-4">
+                            <div class="flex-shrink-0">
+                                {% if object.file_type == 'audio' %}
+                                    <div class="w-10 h-10 bg-blue-500 rounded-md flex items-center justify-center">
+                                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
+                                        </svg>
+                                    </div>
+                                {% else %}
+                                    <div class="w-10 h-10 bg-red-500 rounded-md flex items-center justify-center">
+                                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                                        </svg>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <h4 class="text-lg font-medium text-gray-900 truncate">
+                                    {{ object.title }}
+                                </h4>
+                                <p class="text-sm text-gray-500">
+                                    {{ object.get_file_type_display }} • {{ object.get_file_size_mb }}MB • {{ object.created_at|date:"Y/m/d H:i" }}
+                                </p>
+                                {% if object.description %}
+                                    <p class="text-sm text-gray-600 mt-1">
+                                        {{ object.description|truncatechars:100 }}
+                                    </p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 削除フォーム -->
+                <form method="post" class="space-y-6">
+                    {% csrf_token %}
+                    
+                    <div class="flex justify-end space-x-4">
+                        <a href="{% url 'app:media_detail' object.pk %}" 
+                           class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-md text-sm font-medium">
+                            キャンセル
+                        </a>
+                        <button type="submit" 
+                                class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                            削除する
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

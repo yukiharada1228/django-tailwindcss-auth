@@ -124,7 +124,7 @@ class MediaFileListView(LoginRequiredMixin, ListView):
     """メディアファイル一覧ビュー"""
 
     model = MediaFile
-    template_name = "media/list.html"
+    template_name = "multimedia/list.html"
     context_object_name = "media_files"
     paginate_by = 10
     login_url = "app:login"
@@ -138,7 +138,7 @@ class MediaFileUploadView(LoginRequiredMixin, CreateView):
 
     model = MediaFile
     form_class = MediaFileUploadForm
-    template_name = "media/upload.html"
+    template_name = "multimedia/upload.html"
     success_url = reverse_lazy("app:media_list")
     login_url = "app:login"
 
@@ -155,7 +155,7 @@ class MediaFileUploadView(LoginRequiredMixin, CreateView):
 class MediaFileDetailView(LoginRequiredMixin, TemplateView):
     """メディアファイル詳細ビュー"""
 
-    template_name = "media/detail.html"
+    template_name = "multimedia/detail.html"
     login_url = "app:login"
 
     def get_context_data(self, **kwargs):
@@ -174,7 +174,7 @@ class MediaFileDeleteView(LoginRequiredMixin, DeleteView):
     """メディアファイル削除ビュー"""
 
     model = MediaFile
-    template_name = "media/delete.html"
+    template_name = "multimedia/delete.html"
     success_url = reverse_lazy("app:media_list")
     login_url = "app:login"
 

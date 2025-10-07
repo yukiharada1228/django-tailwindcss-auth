@@ -1,0 +1,165 @@
+{% extends 'base.html' %}
+
+{% block title %}メディアファイル一覧{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto">
+        <!-- ヘッダー -->
+        <div class="bg-white shadow rounded-lg mb-8">
+            <div class="px-4 py-5 sm:p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-900">
+                            メディアファイル一覧
+                        </h1>
+                        <p class="mt-2 text-gray-600">
+                            アップロードした音声・動画ファイルを管理できます
+                        </p>
+                    </div>
+                    <div class="flex space-x-4">
+                        <a href="{% url 'app:media_upload' %}" 
+                           class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                            新規アップロード
+                        </a>
+                        <a href="{% url 'app:index' %}" 
+                           class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                            ホームに戻る
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- メッセージ表示 -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="mb-4 p-4 rounded-md {% if message.tags == 'success' %}bg-green-50 text-green-800{% elif message.tags == 'error' %}bg-red-50 text-red-800{% else %}bg-blue-50 text-blue-800{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <!-- ファイル一覧 -->
+        {% if media_files %}
+            <div class="bg-white shadow rounded-lg">
+                <div class="px-4 py-5 sm:p-6">
+                    <div class="grid grid-cols-1 gap-6">
+                        {% for media_file in media_files %}
+                            <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center space-x-4">
+                                        <div class="flex-shrink-0">
+                                            {% if media_file.file_type == 'audio' %}
+                                                <div class="w-10 h-10 bg-blue-500 rounded-md flex items-center justify-center">
+                                                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
+                                                    </svg>
+                                                </div>
+                                            {% else %}
+                                                <div class="w-10 h-10 bg-red-500 rounded-md flex items-center justify-center">
+                                                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                                                    </svg>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <h3 class="text-lg font-medium text-gray-900 truncate">
+                                                {{ media_file.title }}
+                                            </h3>
+                                            <p class="text-sm text-gray-500">
+                                                {{ media_file.get_file_type_display }} • {{ media_file.get_file_size_mb }}MB • {{ media_file.created_at|date:"Y/m/d H:i" }}
+                                            </p>
+                                            {% if media_file.description %}
+                                                <p class="text-sm text-gray-600 mt-1">
+                                                    {{ media_file.description|truncatechars:100 }}
+                                                </p>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <a href="{% url 'app:media_detail' media_file.pk %}" 
+                                           class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                                            詳細
+                                        </a>
+                                        <a href="{{ media_file.file.url }}" 
+                                           class="text-green-600 hover:text-green-800 text-sm font-medium" 
+                                           target="_blank">
+                                            ダウンロード
+                                        </a>
+                                        <a href="{% url 'app:media_delete' media_file.pk %}" 
+                                           class="text-red-600 hover:text-red-800 text-sm font-medium"
+                                           onclick="return confirm('このファイルを削除しますか？この操作は取り消せません。')">
+                                            削除
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- ページネーション -->
+            {% if is_paginated %}
+                <div class="mt-6 flex items-center justify-between">
+                    <div class="flex-1 flex justify-between sm:hidden">
+                        {% if page_obj.has_previous %}
+                            <a href="?page={{ page_obj.previous_page_number }}" 
+                               class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                                前へ
+                            </a>
+                        {% endif %}
+                        {% if page_obj.has_next %}
+                            <a href="?page={{ page_obj.next_page_number }}" 
+                               class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                                次へ
+                            </a>
+                        {% endif %}
+                    </div>
+                    <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                        <div>
+                            <p class="text-sm text-gray-700">
+                                {{ page_obj.start_index }}〜{{ page_obj.end_index }}件 / 全{{ page_obj.paginator.count }}件
+                            </p>
+                        </div>
+                        <div>
+                            <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+                                {% if page_obj.has_previous %}
+                                    <a href="?page={{ page_obj.previous_page_number }}" 
+                                       class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                        前へ
+                                    </a>
+                                {% endif %}
+                                {% if page_obj.has_next %}
+                                    <a href="?page={{ page_obj.next_page_number }}" 
+                                       class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                        次へ
+                                    </a>
+                                {% endif %}
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        {% else %}
+            <div class="bg-white shadow rounded-lg">
+                <div class="px-4 py-5 sm:p-6 text-center">
+                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                    </svg>
+                    <h3 class="mt-2 text-sm font-medium text-gray-900">ファイルがありません</h3>
+                    <p class="mt-1 text-sm text-gray-500">まだファイルをアップロードしていません。</p>
+                    <div class="mt-6">
+                        <a href="{% url 'app:media_upload' %}" 
+                           class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
+                            最初のファイルをアップロード
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

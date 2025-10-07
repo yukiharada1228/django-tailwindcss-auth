@@ -1,0 +1,169 @@
+{% extends 'base.html' %}
+
+{% block title %}ファイルアップロード{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-3xl mx-auto">
+        <!-- ヘッダー -->
+        <div class="bg-white shadow rounded-lg mb-8">
+            <div class="px-4 py-5 sm:p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-900">
+                            ファイルアップロード
+                        </h1>
+                        <p class="mt-2 text-gray-600">
+                            音声・動画ファイルをアップロードできます
+                        </p>
+                    </div>
+                    <div class="flex space-x-4">
+                        <a href="{% url 'app:media_list' %}" 
+                           class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                            一覧に戻る
+                        </a>
+                        <a href="{% url 'app:index' %}" 
+                           class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                            ホーム
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- アップロードフォーム -->
+        <div class="bg-white shadow rounded-lg">
+            <div class="px-4 py-5 sm:p-6">
+                <form method="post" enctype="multipart/form-data" class="space-y-6">
+                    {% csrf_token %}
+                    
+                    <!-- ファイル種別 -->
+                    <div>
+                        <label for="{{ form.file_type.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                            {{ form.file_type.label }}
+                        </label>
+                        {{ form.file_type }}
+                        {% if form.file_type.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.file_type.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- タイトル -->
+                    <div>
+                        <label for="{{ form.title.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                            {{ form.title.label }}
+                        </label>
+                        {{ form.title }}
+                        {% if form.title.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.title.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- 説明 -->
+                    <div>
+                        <label for="{{ form.description.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                            {{ form.description.label }}
+                        </label>
+                        {{ form.description }}
+                        {% if form.description.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.description.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- ファイル選択 -->
+                    <div>
+                        <label for="{{ form.file.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                            {{ form.file.label }}
+                        </label>
+                        <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:border-gray-400 transition-colors">
+                            <div class="space-y-1 text-center">
+                                <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                                    <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                                <div class="flex text-sm text-gray-600">
+                                    <label for="{{ form.file.id_for_label }}" class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
+                                        <span>ファイルを選択</span>
+                                        {{ form.file }}
+                                    </label>
+                                    <p class="pl-1">またはドラッグ&ドロップ</p>
+                                </div>
+                                <p class="text-xs text-gray-500">
+                                    音声ファイル（MP3, WAV, AAC等）または動画ファイル（MP4, AVI, MOV等）<br>
+                                    最大100MBまで
+                                </p>
+                            </div>
+                        </div>
+                        {% if form.file.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.file.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- 送信ボタン -->
+                    <div class="flex justify-end space-x-4">
+                        <a href="{% url 'app:media_list' %}" 
+                           class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-md text-sm font-medium">
+                            キャンセル
+                        </a>
+                        <button type="submit" 
+                                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                            アップロード
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- アップロードガイド -->
+        <div class="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <h3 class="text-sm font-medium text-blue-800">
+                        アップロードについて
+                    </h3>
+                    <div class="mt-2 text-sm text-blue-700">
+                        <ul class="list-disc list-inside space-y-1">
+                            <li>対応形式：音声（MP3, WAV, AAC等）、動画（MP4, AVI, MOV等）</li>
+                            <li>ファイルサイズ：最大100MB</li>
+                            <li>アップロード後は一覧ページで確認・ダウンロードできます</li>
+                            <li>ファイルは安全に保存され、他のユーザーからはアクセスできません</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// ファイル選択時のプレビュー表示
+document.getElementById('{{ form.file.id_for_label }}').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        const fileSize = (file.size / (1024 * 1024)).toFixed(2);
+        const fileName = file.name;
+        
+        // ファイル情報を表示
+        const fileInfo = document.createElement('div');
+        fileInfo.className = 'mt-2 text-sm text-gray-600';
+        fileInfo.innerHTML = `
+            <p><strong>選択されたファイル:</strong> ${fileName}</p>
+            <p><strong>サイズ:</strong> ${fileSize}MB</p>
+        `;
+        
+        // 既存のファイル情報を削除
+        const existingInfo = document.querySelector('.file-info');
+        if (existingInfo) {
+            existingInfo.remove();
+        }
+        
+        fileInfo.className += ' file-info';
+        e.target.parentNode.appendChild(fileInfo);
+    }
+});
+</script>
+{% endblock %}
