@@ -228,14 +228,7 @@ class ProjectDeleteView(LoginRequiredMixin, DeleteView):
         project_name = project.name
         media_count = project.media_files.count()
 
-        # プロジェクト内のメディアファイルを取得
-        media_files = list(project.media_files.all())
-
-        # メディアファイルの物理ファイルを削除（モデルのメソッドを再利用）
-        for media_file in media_files:
-            media_file.delete_physical_file()
-
-        # メディアファイルのレコードを削除
+        # メディアファイルのレコードを削除（シグナルで物理ファイルも削除される）
         project.media_files.all().delete()
 
         # プロジェクトを削除

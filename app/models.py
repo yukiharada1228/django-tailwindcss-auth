@@ -163,11 +163,9 @@ class MediaFile(models.Model):
     def delete(self, *args, **kwargs):
         """
         メディアファイルを完全に削除（ファイル、ディレクトリ、DB）
+        物理ファイルの削除はpost_deleteシグナルで処理される
         """
-        # 物理ファイルを削除
-        self.delete_physical_file()
-
-        # データベースレコードを削除
+        # データベースレコードを削除（シグナルで物理ファイルも削除される）
         super().delete(*args, **kwargs)
 
 
@@ -176,6 +174,10 @@ def delete_media_file(sender, instance, **kwargs):
     """
     メディアファイル削除時のシグナル
     物理ファイルとディレクトリを削除
+
+    このシグナルはMediaFileモデルのレコードが削除された後に
+    自動的に実行され、物理ファイルの削除を担当する。
+    他の場所で手動でdelete_physical_file()を呼び出す必要はない。
     """
     # モデルのメソッドを再利用
     instance.delete_physical_file()
