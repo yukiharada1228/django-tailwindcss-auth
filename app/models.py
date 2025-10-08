@@ -81,7 +81,7 @@ class Project(models.Model):
 
 
 def media_upload_to(instance, filename):
-    """ユーザー/プロジェクト/日付単位のディレクトリへ保存するパスを返す"""
+    """ユーザー/プロジェクトのディレクトリへ保存するパスを返す"""
     user_part = f"user_{getattr(instance, 'user_id', None) or 'unknown'}"
     project_part = f"project_{getattr(instance, 'project_id', None) or 'unassigned'}"
     return os.path.join(user_part, project_part, filename)
