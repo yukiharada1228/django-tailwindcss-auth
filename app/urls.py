@@ -4,14 +4,17 @@ from . import views
 
 app_name = "app"
 
+# URLパターンの定数化（DRY原則）
+ACCOUNTS_PREFIX = "accounts/"
+
 urlpatterns = [
     path("", views.IndexView.as_view(), name="index"),
-    path("accounts/login/", views.LoginView.as_view(), name="login"),
-    path("accounts/logout/", views.logout_view, name="logout"),
-    path("accounts/signup/", views.SignUpView.as_view(), name="signup"),
-    path("accounts/signup_done/", views.SignUpDoneView.as_view(), name="signup_done"),
+    path(f"{ACCOUNTS_PREFIX}login/", views.LoginView.as_view(), name="login"),
+    path(f"{ACCOUNTS_PREFIX}logout/", views.logout_view, name="logout"),
+    path(f"{ACCOUNTS_PREFIX}signup/", views.SignUpView.as_view(), name="signup"),
+    path(f"{ACCOUNTS_PREFIX}signup_done/", views.SignUpDoneView.as_view(), name="signup_done"),
     path(
-        "accounts/activate/<uidb64>/<token>/",
+        f"{ACCOUNTS_PREFIX}activate/<uidb64>/<token>/",
         views.ActivateView.as_view(),
         name="activate",
     ),

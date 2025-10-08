@@ -131,9 +131,9 @@ django-tailwindcss-multimedia-auth/
 
 ### 認証関連
 - `/` - トップページ
-- `/auth/signup/` - ユーザー登録
-- `/auth/login/` - ログイン
-- `/auth/activate/<token>/` - アカウントアクティベーション
+- `/accounts/signup/` - ユーザー登録
+- `/accounts/login/` - ログイン
+- `/accounts/activate/<uidb64>/<token>/` - アカウントアクティベーション
 
 ### メディアファイル管理
 - `/multimedia/upload/` - ファイルアップロード

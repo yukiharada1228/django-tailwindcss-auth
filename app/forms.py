@@ -7,6 +7,7 @@ from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 
 from .models import MediaFile
+from .urls import ACCOUNTS_PREFIX
 
 User = get_user_model()
 
@@ -86,7 +87,7 @@ Django TailwindCSS Multimedia Auth にご登録いただきありがとうござ
 """
         uid = urlsafe_base64_encode(force_bytes(user.pk))
         token = default_token_generator.make_token(user)
-        activate_url = settings.FRONTEND_URL + f"/accounts/activate/{uid}/{token}/"
+        activate_url = settings.FRONTEND_URL + f"/{ACCOUNTS_PREFIX}activate/{uid}/{token}/"
         message = message_template + activate_url
         user.email_user(subject, message)
 
