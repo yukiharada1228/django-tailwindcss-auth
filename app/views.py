@@ -12,9 +12,10 @@ from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_decode
-from django.views.generic import CreateView, DeleteView, ListView, TemplateView
+from django.views.generic import (CreateView, DeleteView, ListView,
+                                  TemplateView, UpdateView)
 
-from .forms import MediaFileUploadForm, SignUpForm
+from .forms import MediaFileRenameForm, MediaFileUploadForm, SignUpForm
 from .models import MediaFile, User
 
 
@@ -184,3 +185,20 @@ class MediaFileDeleteView(LoginRequiredMixin, DeleteView):
 
     def delete(self, request, *args, **kwargs):
         return super().delete(request, *args, **kwargs)
+
+
+class MediaFileRenameView(LoginRequiredMixin, UpdateView):
+    """メディアファイル名変更ビュー"""
+
+    model = MediaFile
+    form_class = MediaFileRenameForm
+    template_name = "multimedia/rename.html"
+    login_url = "app:login"
+
+    def get_queryset(self):
+        # ユーザーが所有するファイルのみ変更可能
+        return MediaFile.objects.filter(user=self.request.user)
+
+    def get_success_url(self):
+        messages.success(self.request, "ファイル名が正常に変更されました。")
+        return reverse_lazy("app:media_detail", kwargs={"pk": self.object.pk})

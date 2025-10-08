@@ -31,4 +31,9 @@ urlpatterns = [
         views.MediaFileDeleteView.as_view(),
         name="media_delete",
     ),
+    path(
+        "media-files/<int:pk>/rename/",
+        views.MediaFileRenameView.as_view(),
+        name="media_rename",
+    ),
 ]

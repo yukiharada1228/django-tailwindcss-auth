@@ -151,3 +151,23 @@ class MediaFileUploadForm(forms.ModelForm):
                     raise forms.ValidationError("動画ファイルを選択してください。")
 
         return file
+
+
+class MediaFileRenameForm(forms.ModelForm):
+    """メディアファイル名変更フォーム"""
+
+    class Meta:
+        model = MediaFile
+        fields = ["title"]
+        widgets = {
+            "title": forms.TextInput(
+                attrs={
+                    "class": "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500",
+                    "placeholder": "新しいファイル名を入力",
+                }
+            ),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["title"].label = "ファイル名"
