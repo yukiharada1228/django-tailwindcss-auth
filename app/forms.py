@@ -6,8 +6,8 @@ from django.contrib.auth.tokens import default_token_generator
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 
-from .models import MediaFile
 from .constants import ACCOUNTS_PREFIX
+from .models import MediaFile, Project
 
 User = get_user_model()
 
@@ -87,7 +87,9 @@ Django TailwindCSS Multimedia Auth にご登録いただきありがとうござ
 """
         uid = urlsafe_base64_encode(force_bytes(user.pk))
         token = default_token_generator.make_token(user)
-        activate_url = settings.FRONTEND_URL + f"/{ACCOUNTS_PREFIX}activate/{uid}/{token}/"
+        activate_url = (
+            settings.FRONTEND_URL + f"/{ACCOUNTS_PREFIX}activate/{uid}/{token}/"
+        )
         message = message_template + activate_url
         user.email_user(subject, message)
 
@@ -97,8 +99,13 @@ class MediaFileUploadForm(forms.ModelForm):
 
     class Meta:
         model = MediaFile
-        fields = ["title", "description", "file_type", "file"]
+        fields = ["project", "title", "description", "file_type", "file"]
         widgets = {
+            "project": forms.Select(
+                attrs={
+                    "class": "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500",
+                }
+            ),
             "title": forms.TextInput(
                 attrs={
                     "class": "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500",
@@ -126,9 +133,17 @@ class MediaFileUploadForm(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
+        user = kwargs.pop("user", None)
         super().__init__(*args, **kwargs)
+        # プロジェクト選択はログインユーザーの所有プロジェクトに限定
+        if user is not None:
+            self.fields["project"].queryset = Project.objects.filter(owner=user)
+        else:
+            self.fields["project"].queryset = Project.objects.none()
+        self.fields["project"].required = True
         self.fields["title"].label = "タイトル"
         self.fields["description"].label = "説明"
+        self.fields["project"].label = "プロジェクト"
         self.fields["file_type"].label = "ファイル種別"
         self.fields["file"].label = "ファイル"
 

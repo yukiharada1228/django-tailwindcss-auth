@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.utils.translation import gettext_lazy as _
 
-from .models import User
+from .models import Project, User
 
 # 管理画面のタイトル設定
 admin.site.site_header = "Django TailwindCSS Multimedia Auth 管理画面"
@@ -60,3 +60,10 @@ class UserAdmin(BaseUserAdmin):
 
     # 読み取り専用フィールド
     readonly_fields = ("date_joined", "last_login")
+
+
+@admin.register(Project)
+class ProjectAdmin(admin.ModelAdmin):
+    list_display = ("name", "owner", "created_at", "updated_at")
+    list_filter = ("owner", "created_at")
+    search_fields = ("name", "description", "owner__username", "owner__email")

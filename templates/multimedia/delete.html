@@ -18,14 +18,17 @@
                         </p>
                     </div>
                     <div class="flex space-x-4">
-                        <a href="{% url 'app:media_detail' object.pk %}" 
+                        {% if object.project %}
+                        <a href="{% url 'app:project_media_list' object.project.id %}" 
                            class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md text-sm font-medium">
-                            詳細に戻る
-                        </a>
-                        <a href="{% url 'app:media_list' %}" 
-                           class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">
                             一覧に戻る
                         </a>
+                        {% else %}
+                        <a href="{% url 'app:project_list' %}" 
+                           class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                            プロジェクト一覧
+                        </a>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -100,10 +103,17 @@
                     {% csrf_token %}
                     
                     <div class="flex justify-end space-x-4">
-                        <a href="{% url 'app:media_detail' object.pk %}" 
+                        {% if object.project %}
+                        <a href="{% url 'app:project_media_list' object.project.id %}" 
                            class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-md text-sm font-medium">
                             キャンセル
                         </a>
+                        {% else %}
+                        <a href="{% url 'app:index' %}" 
+                           class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-md text-sm font-medium">
+                            キャンセル
+                        </a>
+                        {% endif %}
                         <button type="submit" 
                                 class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium">
                             削除する

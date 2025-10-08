@@ -30,10 +30,17 @@
                     </div>
 
                     <div class="flex items-center justify-between pt-6 border-t border-gray-200">
-                        <a href="{% url 'app:media_detail' mediafile.pk %}" 
+                        {% if mediafile.project %}
+                        <a href="{% url 'app:project_media_list' mediafile.project.id %}" 
                            class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md text-sm font-medium">
                             キャンセル
                         </a>
+                        {% else %}
+                        <a href="{% url 'app:index' %}" 
+                           class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                            ホーム
+                        </a>
+                        {% endif %}
                         <button type="submit" 
                                 class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">
                             変更

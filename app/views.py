@@ -16,14 +16,21 @@ from django.views.generic import (CreateView, DeleteView, ListView,
                                   TemplateView, UpdateView)
 
 from .forms import MediaFileRenameForm, MediaFileUploadForm, SignUpForm
-from .models import MediaFile, User
+from .models import MediaFile, Project, User
 
 
-class IndexView(LoginRequiredMixin, TemplateView):
-    """ログイン必須のホームページ"""
+class IndexView(LoginRequiredMixin, ListView):
+    """ログイン必須のホームページ（プロジェクト一覧）"""
 
+    model = Project
     template_name = "index.html"
+    context_object_name = "projects"
     login_url = "app:login"
+
+    def get_queryset(self):
+        return Project.objects.filter(owner=self.request.user).prefetch_related(
+            "media_files"
+        )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -121,38 +128,6 @@ def protected_media(request, path):
     return response
 
 
-class MediaFileListView(LoginRequiredMixin, ListView):
-    """メディアファイル一覧ビュー"""
-
-    model = MediaFile
-    template_name = "multimedia/list.html"
-    context_object_name = "media_files"
-    paginate_by = 10
-    login_url = "app:login"
-
-    def get_queryset(self):
-        return MediaFile.objects.filter(user=self.request.user)
-
-
-class MediaFileUploadView(LoginRequiredMixin, CreateView):
-    """メディアファイルアップロードビュー"""
-
-    model = MediaFile
-    form_class = MediaFileUploadForm
-    template_name = "multimedia/upload.html"
-    success_url = reverse_lazy("app:media_list")
-    login_url = "app:login"
-
-    def form_valid(self, form):
-        form.instance.user = self.request.user
-        form.instance.file_size = form.instance.file.size
-        return super().form_valid(form)
-
-    def get_success_url(self):
-        messages.success(self.request, "ファイルが正常にアップロードされました。")
-        return super().get_success_url()
-
-
 class MediaFileDetailView(LoginRequiredMixin, TemplateView):
     """メディアファイル詳細ビュー"""
 
@@ -161,13 +136,16 @@ class MediaFileDetailView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        media_file = MediaFile.objects.get(pk=kwargs["pk"])
+        media_file = MediaFile.objects.select_related("project", "user").get(
+            pk=kwargs["pk"]
+        )
 
         # ユーザーが所有するファイルかチェック
         if media_file.user != self.request.user:
             raise Http404("ファイルが見つかりません。")
 
         context["media_file"] = media_file
+        context["project"] = media_file.project
         return context
 
 
@@ -181,10 +159,21 @@ class MediaFileDeleteView(LoginRequiredMixin, DeleteView):
 
     def get_queryset(self):
         # ユーザーが所有するファイルのみ削除可能
-        return MediaFile.objects.filter(user=self.request.user)
+        return MediaFile.objects.filter(user=self.request.user).select_related(
+            "project", "user"
+        )
 
     def delete(self, request, *args, **kwargs):
         return super().delete(request, *args, **kwargs)
+
+    def get_success_url(self):
+        messages.success(self.request, "ファイルを削除しました。")
+        project = getattr(self.object, "project", None)
+        if project:
+            return reverse_lazy(
+                "app:project_media_list", kwargs={"project_id": project.id}
+            )
+        return reverse_lazy("app:project_list")
 
 
 class MediaFileRenameView(LoginRequiredMixin, UpdateView):
@@ -197,8 +186,144 @@ class MediaFileRenameView(LoginRequiredMixin, UpdateView):
 
     def get_queryset(self):
         # ユーザーが所有するファイルのみ変更可能
-        return MediaFile.objects.filter(user=self.request.user)
+        return MediaFile.objects.filter(user=self.request.user).select_related(
+            "project", "user"
+        )
 
     def get_success_url(self):
         messages.success(self.request, "ファイル名が正常に変更されました。")
         return reverse_lazy("app:media_detail", kwargs={"pk": self.object.pk})
+
+
+class ProjectCreateView(LoginRequiredMixin, CreateView):
+    """プロジェクト作成"""
+
+    model = Project
+    fields = ["name", "description"]
+    template_name = "projects/create.html"
+    success_url = reverse_lazy("app:index")
+    login_url = "app:login"
+
+    def form_valid(self, form):
+        form.instance.owner = self.request.user
+        return super().form_valid(form)
+
+
+class ProjectDeleteView(LoginRequiredMixin, DeleteView):
+    """プロジェクト削除"""
+
+    model = Project
+    template_name = "projects/delete.html"
+    success_url = reverse_lazy("app:index")
+    login_url = "app:login"
+
+    def get_queryset(self):
+        return Project.objects.filter(owner=self.request.user).prefetch_related(
+            "media_files"
+        )
+
+    def delete(self, request, *args, **kwargs):
+        """プロジェクト削除時にメディアファイルも削除"""
+        project = self.get_object()
+        project_name = project.name
+        media_count = project.media_files.count()
+
+        # プロジェクト内のメディアファイルを取得
+        media_files = list(project.media_files.all())
+
+        # メディアファイルの物理ファイルを削除（モデルのメソッドを再利用）
+        for media_file in media_files:
+            media_file.delete_physical_file()
+
+        # メディアファイルのレコードを削除
+        project.media_files.all().delete()
+
+        # プロジェクトを削除
+        messages.success(
+            request,
+            f"プロジェクト「{project_name}」とその中のメディアファイル{media_count}件を削除しました。",
+        )
+        return super().delete(request, *args, **kwargs)
+
+
+class ProjectMediaFileListView(LoginRequiredMixin, ListView):
+    """特定プロジェクトのメディアファイル一覧"""
+
+    model = MediaFile
+    template_name = "multimedia/list.html"
+    context_object_name = "media_files"
+    paginate_by = 10
+    login_url = "app:login"
+
+    def _get_project(self):
+        if not hasattr(self, "_project_cache"):
+            project_id = self.kwargs.get("project_id")
+            try:
+                self._project_cache = Project.objects.select_related("owner").get(
+                    id=project_id, owner=self.request.user
+                )
+            except Project.DoesNotExist:
+                raise Http404("プロジェクトが見つかりません。")
+        return self._project_cache
+
+    def get_queryset(self):
+        project = self._get_project()
+        return MediaFile.objects.filter(
+            user=self.request.user, project=project
+        ).select_related("project", "user")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        project = self._get_project()
+        context["current_project_id"] = str(project.id)
+        context["current_project"] = project
+        context["hide_project_filter"] = True
+        return context
+
+
+class ProjectMediaFileUploadView(LoginRequiredMixin, CreateView):
+    """特定プロジェクトに対するメディアファイルアップロード"""
+
+    model = MediaFile
+    form_class = MediaFileUploadForm
+    template_name = "multimedia/upload.html"
+    login_url = "app:login"
+
+    def _get_project(self):
+        project_id = self.kwargs.get("project_id")
+        try:
+            return Project.objects.select_related("owner").get(
+                id=project_id, owner=self.request.user
+            )
+        except Project.DoesNotExist:
+            raise Http404("プロジェクトが見つかりません。")
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["user"] = self.request.user
+        return kwargs
+
+    def get_initial(self):
+        initial = super().get_initial()
+        project = self._get_project()
+        initial["project"] = project
+        return initial
+
+    def form_valid(self, form):
+        project = self._get_project()
+        form.instance.user = self.request.user
+        form.instance.project = project
+        form.instance.file_size = form.instance.file.size
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        messages.success(self.request, "ファイルが正常にアップロードされました。")
+        return reverse_lazy(
+            "app:project_media_list",
+            kwargs={"project_id": self.kwargs.get("project_id")},
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["fixed_project"] = self._get_project()
+        return context

@@ -11,17 +11,19 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <h1 class="text-3xl font-bold text-gray-900">
-                            ファイルアップロード
+                            {% if fixed_project %}{{ fixed_project.name }} にファイルをアップロード{% else %}ファイルアップロード{% endif %}
                         </h1>
                         <p class="mt-2 text-gray-600">
                             音声・動画ファイルをアップロードできます
                         </p>
                     </div>
                     <div class="flex space-x-4">
-                        <a href="{% url 'app:media_list' %}" 
+                        {% if fixed_project %}
+                        <a href="{% url 'app:project_media_list' fixed_project.id %}" 
                            class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md text-sm font-medium">
                             一覧に戻る
                         </a>
+                        {% endif %}
                         <a href="{% url 'app:index' %}" 
                            class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md text-sm font-medium">
                             ホーム
@@ -36,6 +38,23 @@
             <div class="px-4 py-5 sm:p-6">
                 <form method="post" enctype="multipart/form-data" class="space-y-6">
                     {% csrf_token %}
+                    {% if fixed_project %}
+                        <input type="hidden" name="project" value="{{ fixed_project.id }}">
+                        <div class="bg-gray-50 border border-gray-200 rounded-md p-3 text-sm text-gray-700">
+                            プロジェクト: <span class="font-medium">{{ fixed_project.name }}</span>
+                        </div>
+                    {% else %}
+                        <!-- プロジェクト -->
+                        <div>
+                            <label for="{{ form.project.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                                {{ form.project.label }}
+                            </label>
+                            {{ form.project }}
+                            {% if form.project.errors %}
+                                <p class="mt-1 text-sm text-red-600">{{ form.project.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                    {% endif %}
                     
                     <!-- ファイル種別 -->
                     <div>
@@ -100,10 +119,17 @@
 
                     <!-- 送信ボタン -->
                     <div class="flex justify-end space-x-4">
-                        <a href="{% url 'app:media_list' %}" 
+                        {% if fixed_project %}
+                        <a href="{% url 'app:project_media_list' fixed_project.id %}" 
                            class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-md text-sm font-medium">
                             キャンセル
                         </a>
+                        {% else %}
+                        <a href="{% url 'app:index' %}" 
+                           class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-md text-sm font-medium">
+                            ホーム
+                        </a>
+                        {% endif %}
                         <button type="submit" 
                                 class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">
                             アップロード

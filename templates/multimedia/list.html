@@ -11,17 +11,19 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <h1 class="text-3xl font-bold text-gray-900">
-                            メディアファイル一覧
+                            {% if current_project %}{{ current_project.name }} のメディアファイル{% else %}メディアファイル一覧{% endif %}
                         </h1>
                         <p class="mt-2 text-gray-600">
                             アップロードした音声・動画ファイルを管理できます
                         </p>
                     </div>
                     <div class="flex space-x-4">
-                        <a href="{% url 'app:media_upload' %}" 
+                        {% if current_project %}
+                        <a href="{% url 'app:project_media_upload' current_project.id %}"
                            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">
-                            新規アップロード
+                            このプロジェクトにアップロード
                         </a>
+                        {% endif %}
                         <a href="{% url 'app:index' %}" 
                            class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md text-sm font-medium">
                             ホーム
@@ -30,6 +32,23 @@
                 </div>
             </div>
         </div>
+
+        {% if not hide_project_filter %}
+        <div class="bg-white shadow rounded-lg mb-6">
+            <div class="px-4 py-5 sm:p-6">
+                <form method="get" class="flex items-center space-x-3">
+                    <label class="text-sm text-gray-700">プロジェクト:</label>
+                    <select name="project" class="w-64 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">すべて</option>
+                        {% for p in projects %}
+                            <option value="{{ p.id }}" {% if current_project_id|default_if_none:'' == p.id|stringformat:'s' %}selected{% endif %}>{{ p.name }}</option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">絞り込み</button>
+                </form>
+            </div>
+        </div>
+        {% endif %}
 
         <!-- メッセージ表示 -->
         {% if messages %}
@@ -79,7 +98,7 @@
                                         </div>
                                     </div>
                                     <div class="flex items-center space-x-2">
-                                        <a href="{% url 'app:media_detail' media_file.pk %}" 
+                                        <a href="{% url 'app:media_detail' current_project.id media_file.pk %}" 
                                            class="text-blue-600 hover:text-blue-800 text-sm font-medium">
                                             詳細
                                         </a>
@@ -88,9 +107,8 @@
                                            target="_blank">
                                             ダウンロード
                                         </a>
-                                        <a href="{% url 'app:media_delete' media_file.pk %}" 
-                                           class="text-red-600 hover:text-red-800 text-sm font-medium"
-                                           onclick="return confirm('このファイルを削除しますか？この操作は取り消せません。')">
+                                        <a href="{% url 'app:media_delete' current_project.id media_file.pk %}" 
+                                           class="text-red-600 hover:text-red-800 text-sm font-medium">
                                             削除
                                         </a>
                                     </div>
@@ -152,10 +170,10 @@
                     <h3 class="mt-2 text-sm font-medium text-gray-900">ファイルがありません</h3>
                     <p class="mt-1 text-sm text-gray-500">まだファイルをアップロードしていません。</p>
                     <div class="mt-6">
-                        <a href="{% url 'app:media_upload' %}" 
+                        {% if current_project %}<a href="{% url 'app:project_media_upload' current_project.id %}" 
                            class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
-                            最初のファイルをアップロード
-                        </a>
+                            このプロジェクトにアップロード
+                        </a>{% endif %}
                     </div>
                 </div>
             </div>

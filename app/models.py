@@ -4,6 +4,8 @@ import time
 from django.contrib.auth.models import AbstractUser
 from django.core.files.storage import FileSystemStorage
 from django.db import models
+from django.db.models.signals import post_delete
+from django.dispatch import receiver
 from django.utils import timezone
 
 
@@ -57,6 +59,34 @@ class User(AbstractUser):
         return self.username
 
 
+class Project(models.Model):
+    """ユーザーごとのプロジェクト"""
+
+    owner = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="projects", verbose_name="オーナー"
+    )
+    name = models.CharField(max_length=100, verbose_name="プロジェクト名")
+    description = models.TextField(blank=True, verbose_name="説明")
+    created_at = models.DateTimeField(default=timezone.now, verbose_name="作成日時")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="更新日時")
+
+    class Meta:
+        verbose_name = "プロジェクト"
+        verbose_name_plural = "プロジェクト"
+        unique_together = ("owner", "name")
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return self.name
+
+
+def media_upload_to(instance, filename):
+    """ユーザー/プロジェクト/日付単位のディレクトリへ保存するパスを返す"""
+    user_part = f"user_{getattr(instance, 'user_id', None) or 'unknown'}"
+    project_part = f"project_{getattr(instance, 'project_id', None) or 'unassigned'}"
+    return os.path.join(user_part, project_part, filename)
+
+
 class MediaFile(models.Model):
     """音声・動画ファイル用のモデル"""
 
@@ -66,12 +96,24 @@ class MediaFile(models.Model):
     ]
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="ユーザー")
+    project = models.ForeignKey(
+        Project,
+        on_delete=models.CASCADE,
+        related_name="media_files",
+        verbose_name="プロジェクト",
+        null=True,
+        blank=True,
+    )
     title = models.CharField(max_length=200, verbose_name="タイトル")
     description = models.TextField(blank=True, verbose_name="説明")
     file_type = models.CharField(
         max_length=10, choices=FILE_TYPE_CHOICES, verbose_name="ファイル種別"
     )
-    file = models.FileField(storage=SafeMediaFileStorage(), verbose_name="ファイル")
+    file = models.FileField(
+        upload_to=media_upload_to,
+        storage=SafeMediaFileStorage(),
+        verbose_name="ファイル",
+    )
     file_size = models.PositiveIntegerField(verbose_name="ファイルサイズ（バイト）")
     duration = models.DurationField(null=True, blank=True, verbose_name="再生時間")
     created_at = models.DateTimeField(default=timezone.now, verbose_name="作成日時")
@@ -95,27 +137,45 @@ class MediaFile(models.Model):
             return os.path.basename(self.file.name)
         return ""
 
+    def delete_physical_file(self):
+        """
+        メディアファイルの物理ファイルを削除
+        """
+        if self.file:
+            try:
+                file_path = self.file.path
+                if os.path.exists(file_path):
+                    os.remove(file_path)
+                    print(f"メディアファイルを削除しました: {file_path}")
+
+                    # ディレクトリが空になったら削除
+                    file_dir = os.path.dirname(file_path)
+                    if os.path.exists(file_dir) and not os.listdir(file_dir):
+                        try:
+                            os.rmdir(file_dir)
+                            print(f"空のディレクトリを削除: {file_dir}")
+                        except OSError:
+                            pass  # ディレクトリが空でない場合は無視
+
+            except (OSError, ValueError, AttributeError) as e:
+                print(f"メディアファイル削除エラー: {e}")
+
     def delete(self, *args, **kwargs):
         """
         メディアファイルを完全に削除（ファイル、ディレクトリ、DB）
         """
-        try:
-            # ファイルを削除
-            if self.file:
-                try:
-                    # ファイルのパスを取得
-                    file_path = self.file.path
-                    if os.path.exists(file_path):
-                        os.remove(file_path)
-                        print(f"メディアファイルを削除しました: {file_path}")
+        # 物理ファイルを削除
+        self.delete_physical_file()
 
-                except (ValueError, AttributeError, OSError) as e:
-                    print(f"メディアファイル削除エラー: {e}")
+        # データベースレコードを削除
+        super().delete(*args, **kwargs)
 
-            # データベースレコードを削除
-            super().delete(*args, **kwargs)
 
-        except Exception as e:
-            print(f"メディアファイル削除中のエラー: {e}")
-            # エラーが発生してもデータベースの削除は継続
-            super().delete(*args, **kwargs)
+@receiver(post_delete, sender=MediaFile)
+def delete_media_file(sender, instance, **kwargs):
+    """
+    メディアファイル削除時のシグナル
+    物理ファイルとディレクトリを削除
+    """
+    # モデルのメソッドを再利用
+    instance.delete_physical_file()
