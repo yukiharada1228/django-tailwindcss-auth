@@ -1,11 +1,9 @@
 from django.urls import path
 
 from . import views
+from .constants import ACCOUNTS_PREFIX
 
 app_name = "app"
-
-# URLパターンの定数化（DRY原則）
-ACCOUNTS_PREFIX = "accounts/"
 
 urlpatterns = [
     path("", views.IndexView.as_view(), name="index"),

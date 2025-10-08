@@ -7,7 +7,7 @@ from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 
 from .models import MediaFile
-from .urls import ACCOUNTS_PREFIX
+from .constants import ACCOUNTS_PREFIX
 
 User = get_user_model()
 
