@@ -170,3 +170,7 @@ else:
 
 # Frontend URL for activation emails
 FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://127.0.0.1:8000")
+
+# Media file upload settings
+MAX_MEDIA_FILE_SIZE_MB = int(os.environ.get("MAX_MEDIA_FILE_SIZE_MB", "300"))
+MAX_MEDIA_FILE_SIZE_BYTES = MAX_MEDIA_FILE_SIZE_MB * 1024 * 1024

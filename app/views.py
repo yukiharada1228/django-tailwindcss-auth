@@ -319,4 +319,5 @@ class ProjectMediaFileUploadView(LoginRequiredMixin, CreateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["fixed_project"] = self._get_project()
+        context["max_file_size_mb"] = settings.MAX_MEDIA_FILE_SIZE_MB
         return context

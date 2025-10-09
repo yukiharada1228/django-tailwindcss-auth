@@ -63,6 +63,9 @@ USE_MAILGUN=False
 MAILGUN_API_KEY=your-mailgun-api-key
 MAILGUN_SENDER_DOMAIN=your-domain.com
 DEFAULT_FROM_EMAIL=Django TailwindCSS Multimedia <noreply@your-domain.com>
+
+# メディアファイル設定
+MAX_MEDIA_FILE_SIZE_MB=300
 ```
 
 ### 3. コンテナのビルドと起動
@@ -202,7 +205,7 @@ docker compose exec web uv run python manage.py migrate
 アップロードされたメディアファイルは以下の機能を提供します：
 
 - **安全なファイル保存**: タイムスタンプベースのファイル名で重複を回避
-- **ファイルサイズ制限**: 100MB以下のファイルのみアップロード可能
+- **ファイルサイズ制限**: 設定可能（デフォルト300MB）
 - **ファイル形式検証**: 音声・動画ファイルの形式を自動検証
 - **完全削除**: ファイルとデータベースレコードの両方を安全に削除
 
@@ -233,7 +236,7 @@ docker compose exec web uv run python manage.py migrate
    - ポート80が既に使用されている場合は、`docker-compose.yml`でポート番号を変更してください
 
 6. **メディアファイルのアップロードエラー**
-   - ファイルサイズが100MBを超えている場合は、より小さなファイルを選択してください
+   - ファイルサイズが制限を超えている場合は、より小さなファイルを選択してください（制限値は設定で変更可能）
    - サポートされていないファイル形式の場合は、音声・動画ファイルを選択してください
    - `docker compose logs web` でアップロードエラーの詳細を確認してください
 

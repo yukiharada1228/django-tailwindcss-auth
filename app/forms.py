@@ -150,11 +150,11 @@ class MediaFileUploadForm(forms.ModelForm):
     def clean_file(self):
         file = self.cleaned_data.get("file")
         if file:
-            # ファイルサイズ制限（100MB）
-            max_size = 100 * 1024 * 1024  # 100MB
+            # ファイルサイズ制限
+            max_size = settings.MAX_MEDIA_FILE_SIZE_BYTES
             if file.size > max_size:
                 raise forms.ValidationError(
-                    "ファイルサイズが大きすぎます。100MB以下のファイルを選択してください。"
+                    f"ファイルサイズが大きすぎます。{settings.MAX_MEDIA_FILE_SIZE_MB}MB以下のファイルを選択してください。"
                 )
 
             # ファイル形式の検証
